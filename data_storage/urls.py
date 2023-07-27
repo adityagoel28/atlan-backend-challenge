@@ -20,6 +20,8 @@ from app.views import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home),
+    path("mongo/", mongo.as_view()),
     path("health/", HealthCheck.as_view()),
-
+    path("validate/", validateResponses.as_view()),
+    
 ]

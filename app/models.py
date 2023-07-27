@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 
 # Create your models here.
 class Forms(models.Model):
@@ -44,3 +44,11 @@ class Answers(models.Model):
     selected_choice = models.ForeignKey(Choice, on_delete=models.CASCADE, null=True, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
     metadata = JSONField()
+
+class ClientIncome(models.Model):
+    # client_id = models.AutoField(primary_key=True)
+    client_email = models.CharField(max_length=255)
+    client_name = models.CharField(max_length=255)
+    income_per_annum = models.FloatField()
+    savings_per_annum = models.FloatField()
+    mobile_number = models.CharField(max_length=15)
