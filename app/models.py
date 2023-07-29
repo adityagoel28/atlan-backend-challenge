@@ -45,7 +45,7 @@ class Answers(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
     metadata = JSONField()
 
-class ClientIncome(models.Model):
+class Clients(models.Model):
     # client_id = models.AutoField(primary_key=True)
     client_email = models.CharField(max_length=255)
     client_name = models.CharField(max_length=255)

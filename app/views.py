@@ -13,6 +13,10 @@ import urllib
 import os
 
 from utils import message
+from utils import sheet
+from app.models import *
+from decouple import config
+from twilio.rest import Client
 
 # Create your views here.
 def home(request):
@@ -40,40 +44,33 @@ class mongo(APIView):
 
 class validateResponses(APIView):
     def get(self, request):
-        spreadsheet_id = '1SC39VMsTURb6YfAOefsdUmDX2f9oAHztY_zEnGH6Y2s'
-        RANGE = 'Sheet1'
-        # If modifying these scopes, delete the file token.json.
-        SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-        # fieldnames = ["name", "phone", "email", "income_per_annum", "savings_per_annum"]
-        creds = None
-        if os.path.exists('token.json'):
-            creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-        # If there are no (valid) credentials available, let the user log in.
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file('./gsheet_credentials.json', SCOPES)
-                creds = flow.run_local_server(port=0)
-            # Saving the credentials for the next run
-            with open('token.json', 'w') as token:
-                token.write(creds.to_json())
-        try:
-            service = build('sheets', 'v4', credentials = creds)
-            # Calling the Sheets API
-            sheet = service.spreadsheets()
-            result = sheet.values().get(spreadsheetId = spreadsheet_id, range=RANGE).execute()
-            values = result.get('values', [])
-
-            if not values:
-                print('No data found.')
-                return
-
-            for row in values:
-                # print(row)
-                if(row[4] > row[3]):
-                    message.sms(row[0])
-        except HttpError as err:
-            print(err)
-
+        sheet.push_to_s3()
         return APIResponse("Responses Validated", status = 200)
+
+
+class clientData(APIView):
+    def post(self, request):
+        client_name = request.data.get("name")
+        client_email = request.data.get("email")
+        income_per_annum = request.data.get("income_per_annum")
+        savings_per_annum = request.data.get("savings_per_annum")
+        mobile_number = request.data.get("phone")
+        data = {'client_name': client_name, 'client_email': client_email, 'income_per_annum': income_per_annum, 'savings_per_annum': savings_per_annum, 'mobile_number': mobile_number}
+        if Clients.objects.filter(client_email = client_email).exists():
+            return APIResponse("Client already exists", status = 400)
+        else:
+            Clients.objects.create(client_email = client_email, client_name = client_name,
+                                   income_per_annum = income_per_annum, savings_per_annum = savings_per_annum, mobile_number = mobile_number).save()
+            
+            account_sid = config('TWILIO_ACCOUNT_SID')
+            auth_token = config('TWILIO_AUTH_TOKEN')
+            twilio_number = config('TWILIO_NUMBER')
+            client = Client(account_sid, auth_token)
+
+            try:
+                sheet.push_to_google_sheet(data)
+                message = client.messages.create(body=f"Hi {client_name}, thanks for your response. Please find your details - Email: {client_email}, Mobile Number: {mobile_number}, Income per Annum: {income_per_annum}, Savings per annum: {savings_per_annum} ", from_ = twilio_number, to='+918887874339')
+            except Exception as e:
+                print(f"An error occurred while sending the SMS: {str(e)}")
+        return APIResponse("Client created", status = 200)
+

@@ -23,5 +23,5 @@ urlpatterns = [
     path("mongo/", mongo.as_view()),
     path("health/", HealthCheck.as_view()),
     path("validate/", validateResponses.as_view()),
-    
+    path("client", clientData.as_view()),
 ]
