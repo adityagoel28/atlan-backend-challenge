@@ -45,6 +45,9 @@ In this approach, SQS can act as a buffer and rate limiter for our Lambda functi
 
 To handle failsafe, we can use AWS SQS (i.e. Message queue) where if the Lambda can have 3 retries for a request and even then if the Lambda fails to process the request, we can drop it to a "Dead Queue" to check later manually.
 
+## Data
+![image](https://github.com/adityagoel28/atlan-backend-challenge/assets/67872867/c804159b-c446-4aa8-b47c-70d7f50afcd5)
+
 ### Task - 4 ✅
 ```A recent client partner wanted us to send an SMS to the customer whose details are collected in the response as soon as the ingestion was complete reliably. The content of the SMS consists of details of the customer, which were a part of the answers in the response. This customer was supposed to use this as a “receipt” for them having participated in the exercise.```
 
