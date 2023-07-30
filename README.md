@@ -1,5 +1,13 @@
 # atlan-backend-challenge
-Atlan Backend Challenge
+# Data Collection Platform with SMS Notification Feature
+This repository contains the code for a data collection platform that also has an SMS notification feature.
+
+## Tools and Technologies Used :computer:
+- Python (Django)
+- AWS (S3, SQS, Lambda)
+- Postman
+- Twilio
+- Docker
 
 ## Schema Design
 
@@ -32,6 +40,13 @@ This approach is great in itself because it provides continuous scaling for huge
 
 ### 2nd Approach
 Amazon Simple Queue Service (SQS) is a fully managed message queuing service that enables us to decouple and scale microservices, distributed systems, and serverless applications.
+
 In this approach, SQS can act as a buffer and rate limiter for our Lambda function. Instead of directly triggering the Lambda function upon S3 upload, I can send a message to SQS. Then, the Lambda function can be triggered by SQS to process the file. This can help to prevent the Lambda function from getting overwhelmed with too many requests at once, especially when there is huge records in the file or many files are uploaded to S3 at the same time.
 
 To handle failsafe, we can use AWS SQS (i.e. Message queue) where if the Lambda can have 3 retries for a request and even then if the Lambda fails to process the request, we can drop it to a "Dead Queue" to check later manually.
+
+### Task - 4 ✅
+```A recent client partner wanted us to send an SMS to the customer whose details are collected in the response as soon as the ingestion was complete reliably. The content of the SMS consists of details of the customer, which were a part of the answers in the response. This customer was supposed to use this as a “receipt” for them having participated in the exercise.```
+
+I have used Twilio, a cloud communications platform, for the SMS feature. Twilio's APIs enable us to send SMS messages globally and reliably.
+This is one of the unique features - the ability to send an SMS to the customer whose details are collected in the response as soon as the ingestion is complete reliably. The content of the SMS consists of details of the customer, which were a part of the answers in the response. This allows the customer to use the SMS as a “receipt” for their participation in the exercise.
