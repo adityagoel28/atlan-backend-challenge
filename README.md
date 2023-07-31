@@ -8,6 +8,7 @@ This repository contains the code for a data collection platform that also has a
 - Postman
 - Twilio (SMS Feature)
 - Docker
+- - GitHub
 
 ## Consistency and Scalability :rocket:
 ```Eventual consistency is what the clients expect as an outcome of this feature, making sure no responses get missed in the journey. Do keep in mind that this solution must be failsafe, should eventually recover from circumstances like power/internet/service outages, and should scale to cases like millions of responses across hundreds of forms for an organization```
@@ -213,5 +214,11 @@ I have used Twilio, a cloud communications platform, for the SMS feature. Twilio
 This is one of the unique features - the ability to send an SMS to the customer whose details are collected in the response as soon as the ingestion is complete reliably. The content of the SMS consists of details of the customer, which were a part of the answers in the response. This allows the customer to use the SMS as a “receipt” for their participation in the exercise.
 
 Whenever the user sends their response, the data is pushed to google sheets and a text message is also sent to the user with their details/response.
+
+## Dockerizing Django Application:
+I have Dockerized the Django application, allowing for easy and consistent deployment across various environments. By creating a Dockerfile and defining the necessary configurations, this approach packages the Django application and its dependencies into a portable container. Dockerization streamlines the setup process, promotes code portability, and ensures that the application runs consistently on any system with Docker installed. It simplifies development, testing, and deployment, making it an ideal solution for building scalable and maintainable Django applications.
+
+After builing the image, we can simply run the following command to start the application-
+`docker run -d -p 8000:8000 <image-name>`
 
 ## Thanks for this opportunity and the exciting assignment!
