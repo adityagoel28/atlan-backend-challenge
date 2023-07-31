@@ -118,15 +118,15 @@ We can use google translate API for translation purposed into the local language
 ### Task - 2 ✅
 ```A market research agency wanted to validate responses coming in against a set of business rules (eg. monthly savings cannot be more than monthly income) and send the response back to the data collector to fix it when the rules generate a flag.```
 
-![image](https://github.com/adityagoel28/atlan-backend-challenge/assets/67872867/fafcd5fa-6eb9-4ff7-88b0-17f45c9bdb51)
+<img src='images/Task-2 Postman View.png'>
 
 ### AWS Architecture
-![image](https://github.com/adityagoel28/atlan-backend-challenge/assets/67872867/bd6c2c1f-2d79-4ea4-b6d2-c80f12de59d9)
+<img src='images/AWS Architecture.png'>
 
 SQS acts as a buffer and rate limiter for our Lambda function. Instead of directly triggering the Lambda function upon S3 upload, whenever a file is uploaded to S3, a message will be sent to SQS. Then, the Lambda function can be triggered by SQS to process the file. This can help to prevent the Lambda function from getting overwhelmed with too many requests at once, especially when there is huge records in the file or many files are uploaded to S3 at the same time.
 
 ### Lambda function
-![image](https://github.com/adityagoel28/atlan-backend-challenge/assets/67872867/6cbe829b-cf9c-49b8-b764-170ed9a63e9c)
+<img src='images/lambda function.png'>
 
 ```python
 import boto3
@@ -180,7 +180,7 @@ I have also used Lambda layer for `python-decouple` and `twilio` library.
 Lambda Layers are a useful feature in AWS Lambda that allows us  to include external dependencies, such as Python libraries, with our Lambda function without increasing the size of your function deployment package. This is particularly helpful when the Lambda function requires third-party libraries that are not available in the Lambda runtime environment. These 2 libraries are not available in the Lambda runtime environment, hence I have used Lambda layers.
 
 ### Final response send to the specified number.
-![WhatsApp Image 2023-07-31 at 10 09 42](https://github.com/adityagoel28/atlan-backend-challenge/assets/67872867/76eafec1-4079-422c-a0e8-a407891a43a8)
+<img src='images/Twilio Reponse validation.jpg'>
 
 I have included above, some of the messages received. I have sent client'name in this case, we can simply send any other field like client ID or multiple details also using the same method.
 
@@ -189,7 +189,7 @@ I have included above, some of the messages received. I have sent client'name in
 ```A very common need for organizations is wanting all their data onto Google Sheets, wherein they could connect their CRM, and also generate graphs and charts offered by Sheets out of the box. In such cases, each response to the form becomes a row in the sheet, and questions in the form become columns.```
 
 ### Data in the sheet
-![image](https://github.com/adityagoel28/atlan-backend-challenge/assets/67872867/c804159b-c446-4aa8-b47c-70d7f50afcd5)
+<img src='images/gsheet.png'>
 
 ### How it Works
 - Setting up the Google Sheets API: The script uses the Google Sheets API to interact with Google Sheets. The necessary libraries are imported, and the required access scope is defined (https://www.googleapis.com/auth/spreadsheets).
@@ -205,19 +205,19 @@ I have included above, some of the messages received. I have sent client'name in
 ```A recent client partner wanted us to send an SMS to the customer whose details are collected in the response as soon as the ingestion was complete reliably. The content of the SMS consists of details of the customer, which were a part of the answers in the response. This customer was supposed to use this as a “receipt” for them having participated in the exercise.```
 
 ## Sending response via API endpoint from Postman
-![image](https://github.com/adityagoel28/atlan-backend-challenge/assets/67872867/2320aaea-7f03-4e2a-88ab-99aa1360bd54)
+<img src='images/Task-4 Postman View.png'>
 
 It will also check beforehand if the client already exists or not. If it does, then it says `Client already exists`, else a new client data is created.
 
 ## Message received after submitting the response via Twilio
-![WhatsApp Image 2023-07-31 at 09 01 40](https://github.com/adityagoel28/atlan-backend-challenge/assets/67872867/8b165d4d-e71f-4f43-8971-a3823c8e8f50)
+<img src='images/Twilio SMS.jpg'>
 
 I have used Twilio, a cloud communications platform, for the SMS feature. Twilio's APIs enable us to send SMS messages globally and reliably.
 This is one of the unique features - the ability to send an SMS to the customer whose details are collected in the response as soon as the ingestion is complete reliably. The content of the SMS consists of details of the customer, which were a part of the answers in the response. This allows the customer to use the SMS as a “receipt” for their participation in the exercise.
 
 Whenever the user sends their response, the data is pushed to google sheets and a text message is also sent to the user with their details/response.
 
-![image](https://github.com/adityagoel28/atlan-backend-challenge/assets/67872867/101f3671-9c9a-47f4-9fa4-21941c631fe0)
+<img src='images/gsheet1.png'>
 
 ## Dockerizing Django Application:
 I have Dockerized the Django application, allowing for easy and consistent deployment across various environments. By creating a Dockerfile and defining the necessary configurations, this approach packages the Django application and its dependencies into a portable container. Dockerization streamlines the setup process, promotes code portability, and ensures that the application runs consistently on any system with Docker installed. It simplifies development, testing, and deployment, making it an ideal solution for building scalable and maintainable Django applications.
