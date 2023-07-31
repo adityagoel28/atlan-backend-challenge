@@ -1,5 +1,3 @@
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 import os
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -62,8 +60,6 @@ def authorise():
         
     except HttpError as err:
         print(err)
-
-authorise()
 
 def push_to_s3():
     service = authorise()
