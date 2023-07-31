@@ -6,26 +6,38 @@ This repository contains the code for a data collection platform that also has a
 - Python (Django)
 - AWS (S3, SQS, Lambda)
 - Postman
-- Twilio
+- Twilio (SMS Feature)
 - Docker
 
 ## Consistency and Scalability :rocket:
 ```Eventual consistency is what the clients expect as an outcome of this feature, making sure no responses get missed in the journey. Do keep in mind that this solution must be failsafe, should eventually recover from circumstances like power/internet/service outages, and should scale to cases like millions of responses across hundreds of forms for an organization```
 
 My first approach to handle Scalability at Millions of requests, was to use AWS Lambda (Serverless) as a event based architecture to give response.
-This approach is great in itself because it provides continuous scaling for huge number of requests.
+This approach is great in itself because it provides continuous scaling for huge number of requests. `However it can be further optimised as below.`
 
 ### 2nd Approach
 Amazon Simple Queue Service (SQS) is a fully managed message queuing service that enables us to decouple and scale microservices, distributed systems, and serverless applications.
 
 In this approach, SQS can act as a buffer and rate limiter for our Lambda function. Instead of directly triggering the Lambda function upon S3 upload, I can send a message to SQS. Then, the Lambda function can be triggered by SQS to process the file. This can help to prevent the Lambda function from getting overwhelmed with too many requests at once, especially when there is huge records in the file or many files are uploaded to S3 at the same time.
+SQS is a great tool to control the number of responses or data sent to AWS Lambda function. AWS Simple Queue Service (SQS) supports batch operations, which can be used to control the data or message being sent to AWS Lambda functions.
 
-To handle failsafe, we can use AWS SQS (i.e. Message queue) where if the Lambda can have 3 retries for a request and even then if the Lambda fails to process the request, we can drop it to a "Dead Queue" to check later manually.
+In addition to the AWS service used, I have used Django which is a popular web framework for building scalable and maintainable web applications.
+There are several methods to handle hige amount of requests to the server like:
+- <b>Using database partitioning</b>
+Database partitioning is a technique used to split a large database table into smaller, more manageable pieces. By partitioning a table, we can distribute the load across multiple servers and improve the performance of our application.
+- <b>Caching</b>
+Caching is another technique that we can use to improve the performance of our Django application. By caching frequently accessed data, we can reduce the load on the database and improve the response time of our application.
+- <b>Indexing</b>
+Indexing is a database technique used to improve the performance of queries by creating an index on one or more columns in a table. An index allows the database to quickly locate and retrieve the data that matches a query.
+- <b>Database Sharding</b>
+Database sharding is a technique used to horizontally partition a database across multiple servers. By sharding a database, we can distribute the load across multiple servers and improve the performance of our application.
+To use database sharding in Django, we can use the `ShardedRouter` from the `django-sharding` library, which provides a convenient way to shard a database table. 
 
 
 ### Task - 1 ✅
 ```One of the clients wanted to search for slangs (in local language) for an answer to a text question on the basis of cities (which was the answer to a different MCQ question)```
 
+#### Forms Model
 ```
 class Forms(models.Model):
     title = models.CharField(max_length=255)
@@ -36,6 +48,7 @@ class Forms(models.Model):
     metadata = JSONField()
 ```
 
+#### Questions Model
 ```
 class Questions(models.Model):
     QUESTION_TYPES  = [
@@ -50,6 +63,7 @@ class Questions(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 ```
 
+#### Choice Model
 ```
 class Choice(models.Model):
     choice_id = models.AutoField(primary_key=True)
@@ -57,7 +71,7 @@ class Choice(models.Model):
     choice_text = models.CharField(max_length=200)
 ```
 
-
+#### Responses Model
 ```
 class Responses(models.Model):
     form = models.ForeignKey(Forms, on_delete=models.CASCADE, related_name="responses")
@@ -65,6 +79,7 @@ class Responses(models.Model):
     metadata = JSONField()
 ```
 
+#### Answers Model
 ```
 class Answers(models.Model):
     response = models.ForeignKey(Responses, on_delete=models.CASCADE, related_name="answers")
@@ -75,8 +90,7 @@ class Answers(models.Model):
     metadata = JSONField()
 ```
 
-## Schema Design
-
+### Schema Design
 The schema provided here supports data collection using forms, and manages form definitions, questions, responses, and answers.
 
 ### Model Descriptions
@@ -98,6 +112,7 @@ The Answers model captures the individual answers within a response. Each answer
 ### Usage
 This schema design enables handling forms, their questions (both text and multiple choice), and the responses and individual answers to those forms. It supports flexible data collection, and the JSONField in each model allows for storing additional information specific to forms, questions, responses, and answers.
 
+We can use google translate API for translation purposed into the local language.
 
 ### Task - 2 ✅
 ```A market research agency wanted to validate responses coming in against a set of business rules (eg. monthly savings cannot be more than monthly income) and send the response back to the data collector to fix it when the rules generate a flag.```
@@ -107,12 +122,82 @@ This schema design enables handling forms, their questions (both text and multip
 ### AWS Architecture
 ![image](https://github.com/adityagoel28/atlan-backend-challenge/assets/67872867/bd6c2c1f-2d79-4ea4-b6d2-c80f12de59d9)
 
+SQS acts as a buffer and rate limiter for our Lambda function. Instead of directly triggering the Lambda function upon S3 upload, whenever a file is uploaded to S3, a message will be sent to SQS. Then, the Lambda function can be triggered by SQS to process the file. This can help to prevent the Lambda function from getting overwhelmed with too many requests at once, especially when there is huge records in the file or many files are uploaded to S3 at the same time.
+
+### Lambda function
+![image](https://github.com/adityagoel28/atlan-backend-challenge/assets/67872867/79949d81-e51c-4061-90a5-b4588ff17612)
+
+```python
+import boto3
+import json
+from decouple import config
+from twilio.rest import Client
+import csv
+
+def send_sms(data):
+    account_sid = config('TWILIO_ACCOUNT_SID')
+    auth_token = config('TWILIO_AUTH_TOKEN')
+    twilio_number = config('TWILIO_NUMBER')
+    client = Client(account_sid, auth_token)
+
+    try:
+        response = "Sending SMS"
+        message = client.messages.create(body=f"{data}'s savings is greater than income", from_ = twilio_number, to='+918887874339')
+        print(message.sid)
+        response = message.sid
+    except Exception as e:
+        print(f"An error occurred while sending the SMS: {str(e)}")
+        response = e
+
+
+def lambda_handler(event, context):
+    key = 'data1.csv'
+    bucket = 'atlan-data-collection'
+    s3 = boto3.client('s3')
+
+    s3_resource = boto3.resource('s3')
+    s3_object = s3_resource.Object(bucket, key)
+    
+    data = s3_object.get()['Body'].read().decode('utf-8').splitlines()
+    
+    lines = csv.reader(data)
+    headers = next(lines)
+    for line in lines:
+        if(line[4] > line[3]):
+            # print(line[0], line[4], line[3])
+            send_sms(line[0])
+
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Done!')
+    }
+```
+
+I have added `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and `TWILIO_NUMBER` as environment variables for the lambda function for security and privacy purposed which is a good practice.
+
+I have also used Lambda layer for `python-decouple` and `twilio` library.
+Lambda Layers are a useful feature in AWS Lambda that allows us  to include external dependencies, such as Python libraries, with our Lambda function without increasing the size of your function deployment package. This is particularly helpful when the Lambda function requires third-party libraries that are not available in the Lambda runtime environment. These 2 libraries are not available in the Lambda runtime environment, hence I have used Lambda layers.
+
+### Final response send to the specified number.
+![WhatsApp Image 2023-07-31 at 09 39 59](https://github.com/adityagoel28/atlan-backend-challenge/assets/67872867/b2c2edf2-8ab9-4fe1-a46d-1f10d02f03f9)
+
+I have sent client'name in this case, we can simply send any other field like client ID or multiple details also using the same method.
+
 
 ### Task - 3 ✅
 ```A very common need for organizations is wanting all their data onto Google Sheets, wherein they could connect their CRM, and also generate graphs and charts offered by Sheets out of the box. In such cases, each response to the form becomes a row in the sheet, and questions in the form become columns.```
 
 ### Data in the sheet
 ![image](https://github.com/adityagoel28/atlan-backend-challenge/assets/67872867/c804159b-c446-4aa8-b47c-70d7f50afcd5)
+
+### How it Works
+- Setting up the Google Sheets API: The script uses the Google Sheets API to interact with Google Sheets. The necessary libraries are imported, and the required access scope is defined (https://www.googleapis.com/auth/spreadsheets).
+
+- Google Sheets ID and Range: I have specified the target Google Sheet where the form responses will be stored. The Google Sheets ID is a unique identifier that can be found in the URL of the Google Sheet. The script also specifies the sheet and range (RANGE) where the data will be appended.
+
+- Function push_to_google_sheet(data): This function is responsible for pushing form responses to the Google Sheet. It takes a dictionary (data) containing form responses as input. The script then arranges the form responses in the required order and appends them as a new row in the specified Google Sheet.
+
+- Function authorise(): This function handles the authentication and authorization process for the Google Sheets API. It checks for existing credentials in the token.json file. If no valid credentials are found or they have expired, it initiates the login flow to grant permission to access the Google Sheets. Once authorized, the credentials are saved to the token.json file for future use. The function then builds the Google Sheets API service object, which is used to interact with Google Sheets.
 
 
 ### Task - 4 ✅
@@ -126,3 +211,7 @@ This schema design enables handling forms, their questions (both text and multip
 
 I have used Twilio, a cloud communications platform, for the SMS feature. Twilio's APIs enable us to send SMS messages globally and reliably.
 This is one of the unique features - the ability to send an SMS to the customer whose details are collected in the response as soon as the ingestion is complete reliably. The content of the SMS consists of details of the customer, which were a part of the answers in the response. This allows the customer to use the SMS as a “receipt” for their participation in the exercise.
+
+Whenever the user sends their response, the data is pushed to google sheets and a text message is also sent to the user with their details/response.
+
+## Thanks for this opportunity and the exciting assignment!
