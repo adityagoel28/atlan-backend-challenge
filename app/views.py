@@ -2,15 +2,6 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response as APIResponse
 from app.models import *
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-import pymongo
-from pymongo import MongoClient
-import urllib
-import os
 
 from utils import message
 from utils import sheet
@@ -26,21 +17,6 @@ class HealthCheck(APIView):
     def get(self, request):
         message.sms('a')
         return APIResponse("Health OK", status = 200)
-
-class mongo(APIView):
-    def get(self, request):
-        uri = "mongodb+srv://admin:"+ urllib.parse.quote("Admin@123") + "@longshotai.kd4wkfe.mongodb.net/?retryWrites=true&w=majority"
-        client = MongoClient(uri)
-        db = client.data_db
-        client_collection = db['data_collection']
-        item_type_collection = db['item_type_collection']
-        item_collection = db['item_collection']
-        # from config.db import item_collection as collection_name, space_collection, item_type_collection
-
-        spaces = item_collection.find()
-        print(spaces)
-        # return list_serial(spaces)
-        return APIResponse("Mongo", status = 200)
 
 class validateResponses(APIView):
     def get(self, request):

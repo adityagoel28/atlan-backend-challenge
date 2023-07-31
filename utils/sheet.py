@@ -10,11 +10,6 @@ import csv
 import boto3
 from decouple import config
 
-from faker import Faker
-
-fake = Faker("en_US")
-RECORD_COUNT = 100
-
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
@@ -76,7 +71,7 @@ def push_to_s3():
     result = sheet.values().get(spreadsheetId = spreadsheet_id, range=RANGE).execute()
     values = result.get('values', [])
 
-    with open('output.csv', 'w', newline='') as file:
+    with open('data.csv', 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(values)
 
@@ -86,14 +81,9 @@ def push_to_s3():
     # Create an S3 client
     s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
-    filename = 'output.csv'
+    filename = 'data.csv'
     bucket_name = 'atlan-data-collection'
 
     # Uploads the given file using a managed uploader, which will split up large
     # files automatically and upload parts in parallel.
     s3.upload_file(filename, bucket_name, filename)
-
-    # for row in values:
-        #         # print(row)
-        #         if(row[4] > row[3]):
-        #             message.sms(row[0])

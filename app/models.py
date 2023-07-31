@@ -3,14 +3,11 @@ from django.db.models import JSONField
 
 # Create your models here.
 class Forms(models.Model):
-    # form_id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
     email = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # created_by = models.CharField(max_length=255, blank=True)
-    # created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     metadata = JSONField()
 
 class Questions(models.Model):
@@ -24,8 +21,8 @@ class Questions(models.Model):
     question_type = models.CharField(max_length=100, choices=QUESTION_TYPES, default='text')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # mandatory = models.BooleanField(default=False)
     metadata = JSONField()
+
 class Choice(models.Model):
     choice_id = models.AutoField(primary_key=True)
     question = models.ForeignKey(Questions, related_name='choices', on_delete=models.CASCADE)
@@ -33,7 +30,6 @@ class Choice(models.Model):
 
 class Responses(models.Model):
     form = models.ForeignKey(Forms, on_delete=models.CASCADE, related_name="responses")
-    # user = models.ForeignKey(User, on_delete=models.CASCADE)
     submitted_at = models.DateTimeField(auto_now_add=True)
     metadata = JSONField()
 
@@ -46,7 +42,6 @@ class Answers(models.Model):
     metadata = JSONField()
 
 class Clients(models.Model):
-    # client_id = models.AutoField(primary_key=True)
     client_email = models.CharField(max_length=255)
     client_name = models.CharField(max_length=255)
     income_per_annum = models.FloatField()
