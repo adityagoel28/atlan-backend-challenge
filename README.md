@@ -23,14 +23,14 @@ In this approach, SQS can act as a buffer and rate limiter for our Lambda functi
 SQS is a great tool to control the number of responses or data sent to AWS Lambda function. AWS Simple Queue Service (SQS) supports batch operations, which can be used to control the data or message being sent to AWS Lambda functions.
 
 In addition to the AWS service used, I have used Django which is a popular web framework for building scalable and maintainable web applications.
-There are several methods to handle hige amount of requests to the server like:
-- <b>Using database partitioning</b>
+There are several methods which can be implemented to handle hige amount of requests to the server like:
+- <b>Using database partitioning-</b>
 Database partitioning is a technique used to split a large database table into smaller, more manageable pieces. By partitioning a table, we can distribute the load across multiple servers and improve the performance of our application.
-- <b>Caching</b>
+- <b>Caching-</b> `Beneficial when there are many get requests or fetching queries`
 Caching is another technique that we can use to improve the performance of our Django application. By caching frequently accessed data, we can reduce the load on the database and improve the response time of our application.
-- <b>Indexing</b>
+- <b>Indexing-</b> `Beneficial when there are many get requests or fetching queries`
 Indexing is a database technique used to improve the performance of queries by creating an index on one or more columns in a table. An index allows the database to quickly locate and retrieve the data that matches a query.
-- <b>Database Sharding</b>
+- <b>Database Sharding-</b>
 Database sharding is a technique used to horizontally partition a database across multiple servers. By sharding a database, we can distribute the load across multiple servers and improve the performance of our application.
 To use database sharding in Django, we can use the `ShardedRouter` from the `django-sharding` library, which provides a convenient way to shard a database table. 
 
