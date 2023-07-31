@@ -21,10 +21,10 @@ def push_to_google_sheet(data):
     values = [
         [
             data['client_name'],
+            data['mobile_number'],
             data['client_email'],
             data['income_per_annum'],
             data['savings_per_annum'],
-            data['mobile_number'],
         ],
             # Additional rows ...
     ]
