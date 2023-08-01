@@ -13,8 +13,8 @@ This repository contains the code for a data collection platform that also has a
 ## Consistency and Scalability :rocket:
 ```Eventual consistency is what the clients expect as an outcome of this feature, making sure no responses get missed in the journey. Do keep in mind that this solution must be failsafe, should eventually recover from circumstances like power/internet/service outages, and should scale to cases like millions of responses across hundreds of forms for an organization```
 
-My first approach to handle Scalability at Millions of requests, was to use AWS Lambda (Serverless) as a event based architecture to give response.
-This approach is great in itself because it provides continuous scaling for huge number of requests. `However it can be further optimised as below.`
+My first approach to handle Scalability at Millions of requests, was to use AWS Lambda (Serverless) as an event based architecture to give response.
+This approach is great in itself because it provides continuous scaling for a huge number of requests. `However it can be further optimised as below.`
 
 ### 2nd Approach
 Amazon Simple Queue Service (SQS) is a fully managed message queuing service that enables us to decouple and scale microservices, distributed systems, and serverless applications.
@@ -118,6 +118,17 @@ We can use google translate API for translation purposed into the local language
 ### Task - 2 ✅
 ```A market research agency wanted to validate responses coming in against a set of business rules (eg. monthly savings cannot be more than monthly income) and send the response back to the data collector to fix it when the rules generate a flag.```
 
+#### Client Schema
+```
+class Clients(models.Model):
+    client_email = models.CharField(max_length=255)
+    client_name = models.CharField(max_length=255)
+    income_per_annum = models.FloatField()
+    savings_per_annum = models.FloatField()
+    mobile_number = models.CharField(max_length=15)
+ ```
+
+Sending response via Postman
 <img src='images/Task-2 Postman View.png'>
 
 ### AWS Architecture
